@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.environment.BaseLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
+import com.badlogic.gdx.graphics.g3d.environment.SphericalHarmonics;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.RenderableSorter;
@@ -22,6 +23,7 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.ObjectMap.Entry;
 
 import net.mgsx.gltf.scene3d.attributes.PBRMatrixAttribute;
+import net.mgsx.gltf.scene3d.attributes.SphericalHarmonicsAttribute;
 import net.mgsx.gltf.scene3d.lights.DirectionalShadowLight;
 import net.mgsx.gltf.scene3d.lights.PointLightEx;
 import net.mgsx.gltf.scene3d.lights.SpotLightEx;
@@ -37,7 +39,19 @@ import net.mgsx.gltf.scene3d.utils.EnvironmentUtil;
  *
  */
 public class SceneManager implements Disposable {
-	
+
+	public static final float[] sphericalHarmonicFactors = {
+			0.282095f,
+			-0.325735f,
+			0.325735f,
+			-0.325735f,
+			0.273137f,
+			-0.273137f,
+			0.078848f,
+			-0.273137f,
+			0.136569f,
+	};
+
 	private final Array<RenderableProvider> renderableProviders = new Array<RenderableProvider>();
 	
 	private ModelBatch batch;
@@ -57,7 +71,8 @@ public class SceneManager implements Disposable {
 	
 	private PointLightsAttribute pointLights = new PointLightsAttribute();
 	private SpotLightsAttribute spotLights = new SpotLightsAttribute();
-			
+
+	private final float[] sphericalHarmonicsCoefficients = new float[9 * 3];
 
 	public SceneManager() {
 		this(24);
@@ -374,6 +389,17 @@ public class SceneManager implements Disposable {
 	
 	public void setAmbientLight(float lum) {
 		environment.get(ColorAttribute.class, ColorAttribute.AmbientLight).color.set(lum, lum, lum, 1);
+	}
+
+	public void setAmbientLight(SphericalHarmonics sphericalHarmonics) {
+		SphericalHarmonicsAttribute attribute = environment.get(SphericalHarmonicsAttribute.class, SphericalHarmonicsAttribute.Coefficients);
+		if (attribute != null) {
+			float[] coefficients = sphericalHarmonics.data;
+			for (int i = 0; i < 9 * 3; ++i) {
+				sphericalHarmonicsCoefficients[i] = coefficients[i] * sphericalHarmonicFactors[i / 3];
+			}
+			attribute.sphericalHarmonics.set(sphericalHarmonicsCoefficients);
+		}
 	}
 
 	public void setCamera(Camera camera) {

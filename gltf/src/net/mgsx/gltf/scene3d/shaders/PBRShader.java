@@ -30,6 +30,7 @@ import net.mgsx.gltf.scene3d.attributes.PBRMatrixAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRVertexAttributes;
 import net.mgsx.gltf.scene3d.attributes.PBRVolumeAttribute;
+import net.mgsx.gltf.scene3d.attributes.SphericalHarmonicsAttribute;
 import net.mgsx.gltf.scene3d.lights.DirectionalLightEx;
 import net.mgsx.gltf.scene3d.lights.DirectionalShadowLight;
 import net.mgsx.gltf.scene3d.model.WeightVector;
@@ -478,6 +479,8 @@ public class PBRShader extends DefaultShader
 	private int u_texCoord1Transform;
 
 	private int u_ambientLight;
+
+	private int u_sphericalHarmonics;
 	
 	private long textureCoordinateMapMask;
 
@@ -691,6 +694,7 @@ public class PBRShader extends DefaultShader
 		u_morphTargets2 = program.fetchUniformLocation("u_morphTargets2", false);
 		
 		u_ambientLight = program.fetchUniformLocation("u_ambientLight", false);
+		u_sphericalHarmonics = program.fetchUniformLocation("u_sphericalHarmonics", false);
 		
 		u_csmSamplers = program.fetchUniformLocation("u_csmSamplers", false);
 		u_csmPCFClip = program.fetchUniformLocation("u_csmPCFClip", false);
@@ -807,6 +811,12 @@ public class PBRShader extends DefaultShader
 				program.setUniformMatrix(u_csmTransforms + i, light.getProjViewTrans());
 				program.setUniformf(u_csmPCFClip + i, pcf, clip);
 			}
+		}
+
+		SphericalHarmonicsAttribute coefficients = attributes.get(SphericalHarmonicsAttribute.class, SphericalHarmonicsAttribute.Coefficients);
+		if (coefficients != null) {
+			float[] data = coefficients.sphericalHarmonics.data;
+			program.setUniform3fv(u_sphericalHarmonics, data, 0, data.length / 3);
 		}
 	}
 	

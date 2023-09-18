@@ -147,10 +147,25 @@ void main() {
     // Calculate lighting contribution from image based lighting source (IBL)
 
 #if defined(USE_IBL) && defined(ambientLightFlag)
+    vec3 ambientLight = u_ambientLight;
+
+    #ifdef sphericalHarmonicsFlag
+    ambientLight  = u_sphericalHarmonics[0];
+    ambientLight += u_sphericalHarmonics[1] * n.y;
+    ambientLight += u_sphericalHarmonics[2] * n.z;
+    ambientLight += u_sphericalHarmonics[3] * n.x;
+    ambientLight += u_sphericalHarmonics[4] * (n.y * n.x);
+    ambientLight += u_sphericalHarmonics[5] * (n.y * n.z);
+    ambientLight += u_sphericalHarmonics[6] * (3.0 * n.z * n.z - 1.0);
+    ambientLight += u_sphericalHarmonics[7] * (n.z * n.x);
+    ambientLight += u_sphericalHarmonics[8] * (n.x * n.x - n.y * n.y);
+    ambientLight = max(ambientLight, 0.0);
+    #endif // sphericalHarmonicsFlag
+
     PBRLightContribs contribIBL = getIBLContribution(pbrSurface, n, reflection);
-    f_diffuse += contribIBL.diffuse * u_ambientLight;
-    f_specular += contribIBL.specular * u_ambientLight;
-    f_transmission += contribIBL.transmission * u_ambientLight;
+    f_diffuse += contribIBL.diffuse * ambientLight;
+    f_specular += contribIBL.specular * ambientLight;
+    f_transmission += contribIBL.transmission * ambientLight;
     vec3 ambientColor = vec3(0.0, 0.0, 0.0);
 #elif defined(USE_IBL)
     PBRLightContribs contribIBL = getIBLContribution(pbrSurface, n, reflection);

@@ -13,6 +13,9 @@ uniform vec3 u_fogEquation;
 uniform vec3 u_ambientLight;
 #endif // ambientLightFlag
 
+#ifdef sphericalHarmonicsFlag
+uniform vec3 u_sphericalHarmonics[9];
+#endif //sphericalHarmonicsFlag
 
 uniform vec4 u_cameraPosition;
 

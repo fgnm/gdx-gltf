@@ -33,6 +33,7 @@ import net.mgsx.gltf.scene3d.attributes.PBRMatrixAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRTextureAttribute;
 import net.mgsx.gltf.scene3d.attributes.PBRVertexAttributes;
 import net.mgsx.gltf.scene3d.attributes.PBRVolumeAttribute;
+import net.mgsx.gltf.scene3d.attributes.SphericalHarmonicsAttribute;
 import net.mgsx.gltf.scene3d.shaders.PBRShaderConfig.SRGB;
 import net.mgsx.gltf.scene3d.utils.LightUtils;
 import net.mgsx.gltf.scene3d.utils.LightUtils.LightsInfo;
@@ -263,6 +264,10 @@ public class PBRShaderProvider extends DefaultShaderProvider
 			if(renderable.environment.has(ClippingPlaneAttribute.Type)){
 				prefix += "#define clippingPlaneFlag\n";
 			}
+			if(renderable.environment.has(SphericalHarmonicsAttribute.Coefficients)){
+				prefix += "#define sphericalHarmonicsFlag\n";
+			}
+
 			CascadeShadowMapAttribute csm = renderable.environment.get(CascadeShadowMapAttribute.class, CascadeShadowMapAttribute.Type);
 			if(csm != null){
 				prefix += "#define numCSM " + csm.cascadeShadowMap.lights.size + "\n";
